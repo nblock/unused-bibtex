@@ -60,7 +60,7 @@ if __name__ == "__main__":
     all_keys = extract_bibtex_keys_from_bib(args.bibfile)
     unused = all_keys-used_keys
 
-    print('These {} bibtex keys are currently not in use:'.format(len(unused)))
+    print('unused bibtex keys (total {}):'.format(len(unused)))
     for elem in sorted(unused):
         print(elem)
 
