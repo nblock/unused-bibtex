@@ -1,0 +1,67 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+##
+# name: unused-bibtex - print unused bibtex keys
+# author: notizblock <nblock@archlinux.us>
+# license: GPLv3
+# version: 0.1
+
+import argparse
+import fnmatch
+import os
+import re
+
+def get_tex_files(basedir):
+    '''get a list of all tex files starting from a base dir'''
+    flist = []
+    for root, dirnames, filenames in os.walk(basedir):
+          for filename in fnmatch.filter(filenames, '*.tex'):
+                flist.append(os.path.join(root, filename))
+    return set(flist)
+
+def extract_distinct_bibtex_keys_from_files(file_list):
+    '''get a set of distinct bibtex keys for a given file list'''
+    regex = re.compile(r'\cite[^{]*{([^}]*)}')
+    keys = []
+    for f in file_list:
+        with open(f, 'r') as fr:
+            keys.extend(regex.findall(fr.read()))
+    return set(keys)
+
+def extract_bibtex_keys_from_bib(bibfile):
+    '''extract all bibtex keys from a bibfile'''
+    regex = re.compile(r'@[A-Za-z]+{(.*),')
+    with open(bibfile, 'r') as fr:
+        return(set(regex.findall(fr.read())))
+
+def _parse_and_check_args():
+    def _check_basedir(string):
+        '''check if basedir is a directory'''
+        if not os.path.isdir(string):
+            raise argparse.ArgumentTypeError('{} is not a directory'.format(string))
+        return string
+
+    def _check_bibfile(string):
+        '''check if argument is a file with extension: bib'''
+        if not string.endswith('bib'):
+            raise argparse.ArgumentTypeError('{} is not a bib file'.format(string))
+        return string
+    
+    parser = argparse.ArgumentParser(description='A tool to list unused bibtex keys')
+    parser.add_argument(dest='basedir', type=_check_basedir, help='Base directory of your tex-files')
+    parser.add_argument(dest='bibfile', type=_check_bibfile, help='Path to your bibtex file')
+    return(parser.parse_args())
+
+
+if __name__ == "__main__":
+    args = _parse_and_check_args()
+    tex_files = get_tex_files(args.basedir)
+    used_keys = extract_distinct_bibtex_keys_from_files(tex_files)
+    all_keys = extract_bibtex_keys_from_bib(args.bibfile)
+    unused = all_keys-used_keys
+
+    print('These {} bibtex keys are currently not in use:'.format(len(unused)))
+    for elem in sorted(unused):
+        print(elem)
+
+# vim: tabstop=4 expandtab shiftwidth=4 softtabstop=4 smartindent autoindent
