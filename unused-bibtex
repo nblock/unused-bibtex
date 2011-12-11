@@ -4,7 +4,6 @@
 # name: unused-bibtex - print unused bibtex keys
 # author: notizblock <nblock@archlinux.us>
 # license: GPLv3
-# version: 0.1
 
 import argparse
 import fnmatch
@@ -47,7 +46,7 @@ def _parse_and_check_args():
             raise argparse.ArgumentTypeError('{} is not a bib file'.format(string))
         return string
     
-    parser = argparse.ArgumentParser(description='A tool to find unused bibtex keys')
+    parser = argparse.ArgumentParser(description='A simple script to find unused bibtex keys')
     parser.add_argument(dest='basedir', type=_check_basedir, help='Base directory of your tex-files')
     parser.add_argument(dest='bibfile', type=_check_bibfile, help='Path to your bibtex file')
     return(parser.parse_args())
